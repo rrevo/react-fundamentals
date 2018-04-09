@@ -2,16 +2,14 @@ import React, {Component} from 'react'
 
 class Book extends Component {
     render() {
-        const {coverWidth, coverHeight, coverUrl, title, authors} = this.props;
+        const {id, imageLinks, title, authors} = this.props.data;
 
         return (
-            <div className="book">
+            <div className="book" id={id}>
                 <div className="book-top">
-                    <div className="book-cover" style={{
-                        width: coverWidth,
-                        height: coverHeight,
-                        backgroundImage: `url(${coverUrl})`
-                    }}/>
+                    <div className="book-cover">
+                        <img src={imageLinks.smallThumbnail} width={128} height={192} alt={title}/>
+                    </div>
                     <div className="book-shelf-changer">
                         <select>
                             <option value="none" disabled>Move to...</option>
@@ -24,7 +22,7 @@ class Book extends Component {
                     </div>
                 </div>
                 <div className="book-title">{title}</div>
-                <div className="book-authors">{authors}</div>
+                <div className="book-authors">{authors.join(', ')}</div>
             </div>
         )
     }
