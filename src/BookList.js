@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 import {Link} from 'react-router-dom'
 import Book from './Book'
 
@@ -17,7 +18,7 @@ class BookList extends Component {
                     <ol className="books-grid">
                         {books.map((book) => (
                             <li key={book.id}>
-                                <Book data={book} format={format}/>
+                                <Book data={book} format={format} onUpdateShelf={this.props.onUpdateShelf}/>
                             </li>
                         ))}
                     </ol>
@@ -26,5 +27,9 @@ class BookList extends Component {
         )
     }
 }
+
+BookList.propTypes = {
+    onUpdateShelf: PropTypes.func.isRequired
+};
 
 export default BookList

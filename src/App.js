@@ -1,9 +1,9 @@
-import React from 'react'
-import {Link, Route} from 'react-router-dom'
+import React from 'react';
+import {Link, Route} from 'react-router-dom';
 
-import './App.css'
-import BookList from './BookList'
-import {getAll} from "./BooksAPI";
+import './App.css';
+import BookList from './BookList';
+import * as BooksAPI from './BooksAPI';
 
 class BooksApp extends React.Component {
     state = {
@@ -11,10 +11,22 @@ class BooksApp extends React.Component {
     };
 
     componentDidMount() {
-        getAll().then(newBooks => this.setState({
+        BooksAPI.getAll().then(newBooks => this.setState({
             books: newBooks
         }));
     }
+
+    updateBook = (bookId, shelf) => {
+        this.setState((currentState) => ({
+            books: currentState.books.map((currentBook) => {
+                if (bookId === currentBook.id) {
+                    currentBook.shelf = shelf;
+                }
+                return currentBook;
+            })
+        }));
+        BooksAPI.update({id: bookId}, shelf)
+    };
 
     render() {
         return (
@@ -50,7 +62,9 @@ class BooksApp extends React.Component {
                                 <BookList
                                     title={"Book"}
                                     books={this.state.books.filter(book => book.id === router.match.params.id)}
-                                    format={"single"}/>
+                                    format={"single"}
+                                    onUpdateShelf={this.updateBook}
+                                />
                             </div>
                         </div>
                         <div className="open-search">
@@ -68,15 +82,21 @@ class BooksApp extends React.Component {
                                 <BookList
                                     title={"Currently Reading"}
                                     books={this.state.books.filter(book => book.shelf === "currentlyReading")}
-                                    format={"list"}/>
+                                    format={"list"}
+                                    onUpdateShelf={this.updateBook}
+                                />
                                 <BookList
                                     title={"Want to Read"}
                                     books={this.state.books.filter(book => book.shelf === "wantToRead")}
-                                    format={"list"}/>
+                                    format={"list"}
+                                    onUpdateShelf={this.updateBook}
+                                />
                                 <BookList
                                     title={"Read"}
                                     books={this.state.books.filter(book => book.shelf === "read")}
-                                    format={"list"}/>
+                                    format={"list"}
+                                    onUpdateShelf={this.updateBook}
+                                />
                             </div>
                         </div>
                         <div className="open-search">

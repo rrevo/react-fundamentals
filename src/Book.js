@@ -1,9 +1,10 @@
 import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 import {Link} from 'react-router-dom'
 
 class Book extends Component {
     render() {
-        const {id, imageLinks, title, authors, averageRating, ratingsCount} = this.props.data;
+        const {id, imageLinks, title, authors, averageRating, ratingsCount, shelf} = this.props.data;
 
         return (
             <div className="book" id={id}>
@@ -14,13 +15,12 @@ class Book extends Component {
                         </Link>
                     </div>
                     <div className="book-shelf-changer">
-                        <select>
+                        <select onChange={event => this.props.onUpdateShelf(id, event.target.value)} value={shelf}>
                             <option value="none" disabled>Move to...</option>
                             <option value="currentlyReading">Currently Reading
                             </option>
                             <option value="wantToRead">Want to Read</option>
                             <option value="read">Read</option>
-                            <option value="none">None</option>
                         </select>
                     </div>
                 </div>
@@ -33,5 +33,9 @@ class Book extends Component {
         )
     }
 }
+
+Book.propTypes = {
+    onUpdateShelf: PropTypes.func.isRequired
+};
 
 export default Book
