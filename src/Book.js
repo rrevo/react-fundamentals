@@ -10,7 +10,7 @@ class Book extends Component {
             <div className="book" id={id}>
                 <div className="book-top">
                     <div className="book-cover">
-                        <Link to={"/" + id}>
+                        <Link to={"/book/" + id}>
                             <img src={imageLinks.smallThumbnail} width={128} height={192} alt={title}/>
                         </Link>
                     </div>
