@@ -18,7 +18,10 @@ class BookList extends Component {
                     <ol className="books-grid">
                         {books.map((book) => (
                             <li key={book.id}>
-                                <Book data={book} format={format} onUpdateShelf={this.props.onUpdateShelf}/>
+                                <Book data={book}
+                                      format={format}
+                                      onUpdateShelf={this.props.onUpdateShelf}
+                                      searchContext={this.props.searchContext}/>
                             </li>
                         ))}
                     </ol>

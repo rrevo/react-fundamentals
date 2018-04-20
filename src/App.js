@@ -7,7 +7,8 @@ import * as BooksAPI from './BooksAPI';
 
 class BooksApp extends React.Component {
     state = {
-        books: []
+        books: [],
+        searchBooks: []
     };
 
     componentDidMount() {
@@ -16,16 +17,63 @@ class BooksApp extends React.Component {
         }));
     }
 
+    getCurrentBook = (searchBook) => {
+        return this.state.books.filter((book) => book.id === searchBook.id);
+    };
+
     updateBook = (bookId, shelf) => {
-        this.setState((currentState) => ({
-            books: currentState.books.map((currentBook) => {
-                if (bookId === currentBook.id) {
-                    currentBook.shelf = shelf;
+        if (shelf === "none") {
+            return;
+        }
+        let currentBook = this.getCurrentBook({id: bookId});
+        if (Array.isArray(currentBook) && currentBook.length === 1) {
+            // Current book case
+            this.setState((currentState) => ({
+                books: currentState.books.map((currentBook) => {
+                    if (bookId === currentBook.id) {
+                        currentBook.shelf = shelf;
+                    }
+                    return currentBook;
+                })
+            }));
+            BooksAPI.update({id: bookId}, shelf);
+        } else {
+            // New book from search
+            BooksAPI.get(bookId)
+                .then((book) => {
+                    book.shelf = shelf;
+                    let newBooks = this.state.books;
+                    newBooks.push(book);
+                    this.setState((currentState) => ({
+                        books: newBooks
+                    }));
+                })
+                .finally(() => (BooksAPI.update({id: bookId}, shelf)));
+        }
+    };
+
+    searchQuery = (term) => {
+        if (!term) {
+            return;
+        }
+        // TODO multiple terms..
+        BooksAPI.search(term)
+            .then(results => {
+                if (!Array.isArray(results)) {
+                    results = []
                 }
-                return currentBook;
+                // Set shelf if book is found in current known state
+                let newSearchBooks = results.map((book) => {
+                    let currentBook = this.getCurrentBook(book);
+                    if (Array.isArray(currentBook) && currentBook.length === 1) {
+                        book.shelf = currentBook[0].shelf
+                    }
+                    return book;
+                });
+                this.setState((currentState) => ({
+                    searchBooks: newSearchBooks
+                }));
             })
-        }));
-        BooksAPI.update({id: bookId}, shelf)
     };
 
     render() {
@@ -44,11 +92,20 @@ class BooksApp extends React.Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                                <input type="text" placeholder="Search by title or author"/>
+                                <input type="text"
+                                       placeholder="Search by title or author"
+                                       onChange={(event) => this.searchQuery(event.target.value)}
+                                />
                             </div>
                         </div>
                         <div className="search-books-results">
-                            <ol className="books-grid"></ol>
+                            <BookList
+                                title={"Search Results"}
+                                books={this.state.searchBooks}
+                                format={"list"}
+                                onUpdateShelf={this.updateBook}
+                                searchContext={true}
+                            />
                         </div>
                     </div>
                 )}/>
@@ -64,6 +121,7 @@ class BooksApp extends React.Component {
                                     books={this.state.books.filter(book => book.id === router.match.params.id)}
                                     format={"single"}
                                     onUpdateShelf={this.updateBook}
+                                    searchContext={false}
                                 />
                             </div>
                         </div>
@@ -84,18 +142,21 @@ class BooksApp extends React.Component {
                                     books={this.state.books.filter(book => book.shelf === "currentlyReading")}
                                     format={"list"}
                                     onUpdateShelf={this.updateBook}
+                                    searchContext={false}
                                 />
                                 <BookList
                                     title={"Want to Read"}
                                     books={this.state.books.filter(book => book.shelf === "wantToRead")}
                                     format={"list"}
                                     onUpdateShelf={this.updateBook}
+                                    searchContext={false}
                                 />
                                 <BookList
                                     title={"Read"}
                                     books={this.state.books.filter(book => book.shelf === "read")}
                                     format={"list"}
                                     onUpdateShelf={this.updateBook}
+                                    searchContext={false}
                                 />
                             </div>
                         </div>
