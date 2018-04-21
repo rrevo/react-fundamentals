@@ -12,11 +12,17 @@ class Book extends Component {
                     <div className="book-cover">
                         {!this.props.searchContext && (
                             <Link to={"/book/" + id}>
-                                <img src={imageLinks.smallThumbnail} width={128} height={192} alt={title}/>
+                                {imageLinks && imageLinks.smallThumbnail &&
+                                (<img src={imageLinks.smallThumbnail} width={128} height={192} alt={title}/>)}
+                                {(!imageLinks || !imageLinks.smallThumbnail) &&
+                                (<div>{title}</div>)}
                             </Link>
                         )}
-                        {this.props.searchContext && (
+                        {this.props.searchContext && imageLinks && imageLinks.smallThumbnail && (
                             <img src={imageLinks.smallThumbnail} width={128} height={192} alt={title}/>
+                        )}
+                        {this.props.searchContext && !imageLinks && (
+                            <div>{title}</div>
                         )}
                     </div>
                     <div className="book-shelf-changer">
