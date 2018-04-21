@@ -7,8 +7,9 @@ import * as BooksAPI from './BooksAPI';
 
 class BooksApp extends React.Component {
     state = {
-        books: [],
-        searchBooks: []
+        books: [], // current books on the shelf
+        searchBooks: [], // results from a book
+        searchIndex: 0 // search request index by the user. used to ignore results from a past search
     };
 
     componentDidMount() {
@@ -52,28 +53,40 @@ class BooksApp extends React.Component {
         }
     };
 
-    searchQuery = (term) => {
-        if (!term) {
+    searchQuery = (searchTerm) => {
+        if (!searchTerm) {
             return;
         }
-        // TODO multiple terms..
-        BooksAPI.search(term)
-            .then(results => {
-                if (!Array.isArray(results)) {
-                    results = []
-                }
-                // Set shelf if book is found in current known state
-                let newSearchBooks = results.map((book) => {
-                    let currentBook = this.getCurrentBook(book);
-                    if (Array.isArray(currentBook) && currentBook.length === 1) {
-                        book.shelf = currentBook[0].shelf
-                    }
-                    return book;
-                });
-                this.setState((currentState) => ({
-                    searchBooks: newSearchBooks
-                }));
+        // When a new valid search is received, the search index is incremented and results are cleared.
+        let newSearchIndex = this.state.searchIndex + 1;
+        this.setState((currentState) => ({
+            searchIndex: newSearchIndex,
+            searchBooks: []
+        }), () => {
+            let terms = searchTerm.split(" ");
+            terms.forEach((term) => {
+                BooksAPI.search(term)
+                    .then(results => {
+                        if (!Array.isArray(results)) {
+                            results = []
+                        }
+                        // Set shelf if book is found in current known state
+                        let newSearchBooks = results.map((book) => {
+                            let currentBook = this.getCurrentBook(book);
+                            if (Array.isArray(currentBook) && currentBook.length === 1) {
+                                book.shelf = currentBook[0].shelf
+                            }
+                            return book;
+                        });
+                        if (newSearchIndex === this.state.searchIndex) {
+                            Array.prototype.push.apply(newSearchBooks, this.state.searchBooks);
+                            this.setState((currentState) => ({
+                                searchBooks: newSearchBooks
+                            }));
+                        }
+                    })
             })
+        });
     };
 
     render() {
