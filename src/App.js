@@ -68,13 +68,15 @@ class BooksApp extends React.Component {
                 BooksAPI.search(term)
                     .then(results => {
                         if (!Array.isArray(results)) {
-                            results = []
+                            results = [];
                         }
                         // Set shelf if book is found in current known state
                         let newSearchBooks = results.map((book) => {
                             let currentBook = this.getCurrentBook(book);
                             if (Array.isArray(currentBook) && currentBook.length === 1) {
-                                book.shelf = currentBook[0].shelf
+                                book.shelf = currentBook[0].shelf;
+                            } else {
+                                book.shelf = "none";
                             }
                             return book;
                         });
