@@ -20,7 +20,7 @@ const Book = ({data, searchContext, onUpdateShelf, format}) => {
                     )}
                 </div>
                 <div className="book-shelf-changer">
-                    <select onChange={event => onUpdateShelf(id, event.target.value)} value={shelf}>
+                    <select onChange={event => onUpdateShelf(data, event.target.value)} value={shelf}>
                         <option value="move" disabled>Move to...</option>
                         <option value="currentlyReading">Currently Reading
                         </option>

@@ -13,8 +13,8 @@ class BooksApp extends React.Component {
     };
 
     componentDidMount() {
-        BooksAPI.getAll().then(newBooks => this.setState({
-            books: newBooks
+        BooksAPI.getAll().then(books => this.setState({
+            books
         }));
     }
 
@@ -22,41 +22,21 @@ class BooksApp extends React.Component {
         return this.state.books.filter((book) => book.id === searchBook.id);
     };
 
-    updateBook = (bookId, shelf) => {
+    updateBook = (book, shelf) => {
         if (shelf === "none") {
             return;
         }
-        let currentBook = this.getCurrentBook({id: bookId});
-        if (Array.isArray(currentBook) && currentBook.length === 1) {
-            // Current book case
-            this.setState((currentState) => ({
-                books: currentState.books.map((currentBook) => {
-                    if (bookId === currentBook.id) {
-                        currentBook.shelf = shelf;
-                    }
-                    return currentBook;
-                })
-            }));
-            BooksAPI.update({id: bookId}, shelf);
-        } else {
-            // New book from search
-            BooksAPI.get(bookId)
-                .then((book) => {
-                    book.shelf = shelf;
-                    let newBooks = this.state.books;
-                    newBooks.push(book);
-                    this.setState((currentState) => ({
-                        books: newBooks
-                    }));
-                })
-                .finally(() => (BooksAPI.update({id: bookId}, shelf)));
+        if (book.shelf !== shelf) {
+            BooksAPI.update(book, shelf).then(() => {
+                book.shelf = shelf;
+                this.setState(state => ({
+                    books: this.state.books.filter(b => b.id !== book.id).concat([book])
+                }))
+            })
         }
     };
 
     searchQuery = (searchTerm) => {
-        if (!searchTerm) {
-            return;
-        }
         // When a new valid search is received, the search index is incremented and results are cleared.
         let newSearchIndex = this.state.searchIndex + 1;
         this.setState((currentState) => ({
@@ -65,6 +45,10 @@ class BooksApp extends React.Component {
         }), () => {
             let terms = searchTerm.split(" ");
             terms.forEach((term) => {
+                term = term.trim();
+                if (term === "") {
+                    return;
+                }
                 BooksAPI.search(term)
                     .then(results => {
                         if (!Array.isArray(results)) {
